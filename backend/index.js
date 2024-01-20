@@ -1,12 +1,13 @@
 //write basic express boilerplate code
 //express.json() as middleware
 const express= require("express");
+const { todo } = require("./db");
 const { createTodo, updateTodo } = require("./types");
 const app = express();
 
 app.use(express.json());
 
-app.post("/todo",(req,res) => {
+app.post("/todo",async (req,res) => {
     const createPayLoad = req.body;
     const parsedPayLoad = createTodo.safeParse(createPayLoad)
     if(!parsedPayLoad.success){
@@ -15,13 +16,28 @@ app.post("/todo",(req,res) => {
         })
         return;
     }
+//await beacuse if db is down then user will not get msg that Todo created successfully
+    await todo.create({
+        title : createPayLoad.title,
+        description : createPayLoad.description,
+        completed : false,
+    })
+
+    res.json({
+        msg : "Todo created successfully"
+    })
 })
 
-app.get("/todos", (req,res) =>{
+app.get("/todos", async (req,res) =>{
+    const todos = await todo.find({});
+    res.json({
+        todos
+    })
+
 
 })
 
-app.put("/completed",(req,res) => {
+app.put("/completed",async (req,res) => {
     const updatePayload = req.body;
     const parsedPayLoad = updateTodo.safeParse(updatePayload)
     if(!parsedPayLoad.success){
@@ -30,6 +46,14 @@ app.put("/completed",(req,res) => {
         })
     }
 
+    await todo.update({
+        _id : req.body.id
+    },{
+        completed : true
+    })
+    res.json({
+        msg : "ToDo completed successfully"
+    })
 })
 
 const PORT = 3000;
