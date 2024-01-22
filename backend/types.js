@@ -1,7 +1,7 @@
 const { string } = require("zod");
 const zod = require("zod");
 
-const createTodo = zod.obejct({
+const createTodo = zod.object({
     title : zod.string(),
     description : zod.string()
 })
